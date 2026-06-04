@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.codex-scratch/
+
+outputs/
+*.xlsx
+*.xls
+*.pdf
+~$*.xlsx
+
+.DS_Store

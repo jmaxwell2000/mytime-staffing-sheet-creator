@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mytime-staffing-sheet-creator
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: MAX_UPLOAD_MB
+        value: "10"

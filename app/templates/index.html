@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyTime Staffing Sheet Creator</title>
+    <link rel="stylesheet" href="/static/app.css?v=2.0" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <div class="heading">
+          <p class="eyebrow">MyTime Staffing Sheet Creator</p>
+          <h1>Staffing sheet creator</h1>
+        </div>
+
+        <form id="convert-form" class="converter" method="post" action="/convert" enctype="multipart/form-data">
+          <label class="upload-box" for="workbook">
+            <span class="upload-title">Upload MyTime export</span>
+            <span id="file-label" class="upload-subtitle">Choose an .xlsx workbook</span>
+            <input id="workbook" name="workbook" type="file" accept=".xlsx" required />
+          </label>
+
+          <details class="options">
+            <summary>Options</summary>
+            <div class="option-grid">
+              <label class="toggle">
+                <input id="include-back-pages" name="include_back_pages" type="checkbox" />
+                <span>Include back pages</span>
+              </label>
+
+              <div id="offset-control" class="offset-control">
+                <div class="offset-row">
+                  <label for="back-page-offset">Back page offset</label>
+                  <output id="offset-value" for="back-page-offset">0.00 in</output>
+                </div>
+                <input
+                  id="back-page-offset"
+                  name="back_page_offset"
+                  type="range"
+                  min="-0.10"
+                  max="0.30"
+                  step="0.01"
+                  value="0.00"
+                />
+                <p class="help">Moves the back-page lines up or down so they align with the front sheet when double-sided pages are viewed through paper.</p>
+                <p class="help">If back lines print too high, increase the offset. If they print too low, decrease it.</p>
+              </div>
+            </div>
+          </details>
+
+          <button id="submit-button" class="primary-button" type="submit">Convert and download</button>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </form>
+
+        <footer class="app-meta" aria-label="Version information">
+          <span>v2.0</span>
+          <span>Updated June 3, 2026</span>
+        </footer>
+      </section>
+    </main>
+    <script src="/static/app.js?v=4"></script>
+  </body>
+</html>
