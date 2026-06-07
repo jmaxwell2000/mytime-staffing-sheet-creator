@@ -11,6 +11,8 @@ import re
 from typing import Iterable
 
 from openpyxl import Workbook
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
@@ -21,12 +23,17 @@ from app.parser.models import ScheduleRecord
 DAY_PERIODS = ("0700-1100", "1100-1500", "1500-1900")
 NIGHT_PERIODS = ("1900-2300", "2300-0300", "0300-0700")
 
-RN_CAPACITY = 15
+RN_CAPACITY = 16
 PSA_CAPACITY = 11
-BACK_LINE_ROWS = tuple(range(3, 30))
-COLUMN_WIDTHS = {"A": 2, "B": 4.14, "C": 17.5, "D": 5.5, "E": 5.5, "F": 22.95, "G": 22.95, "H": 22.95}
+BACK_LINE_ROWS = tuple(range(3, 31))
+COLUMN_WIDTHS = {"A": 2, "B": 5.01, "C": 35.2, "D": 7.0, "E": 7.0, "F": 29.16, "G": 29.16, "H": 29.16}
 FRONT_PENCIL_REMINDER = "Use pencil. Write and initial notes on the back of this sheet."
 BACK_PENCIL_REMINDER = "Use pencil"
+WORKBOOK_CREATOR_VERSION = "v2.0"
+BACK_FOOTER_TEXT = f"Created by MyTime Staffing Sheet Creator {WORKBOOK_CREATOR_VERSION}"
+BACK_FOOTER_FONT_SIZE = 8
+BACK_BLANK_SPACE_TEXT = "Please enjoy this complementary blank space for no additional charge"
+BACK_BLANK_SPACE_FONT_SIZE = 8
 
 HEADER_FILL = PatternFill("solid", fgColor="D9E3F0")
 UNORTHODOX_TIME_FILL = PatternFill("solid", fgColor="FFF2CC")
@@ -34,14 +41,20 @@ FALL_TITLE_FILL = PatternFill("solid", fgColor="FCE4D6")
 FALL_HEADER_FILL = PatternFill("solid", fgColor="FBE5D6")
 FALL_BODY_FILL = PatternFill("solid", fgColor="FFF8E1")
 THIN = Side(style="thin", color="000000")
-BACK_LINE_SIDE = Side(style="thin", color="B7B7B7")
-BACK_TEXT_COLOR = "808080"
+BACK_LINE_SIDE = Side(style="thin", color="D9D9D9")
+BACK_TEXT_COLOR = "A6A6A6"
 GRID_BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 QUESTION_BULLET = "\u2022 "
-FALL_PREVENTION_TEXT = "Post-fall measures (circle):              Alarm           Nonskid socks             Fall sign             Stay with pt toileting             Fall risk score             Other:____________"
-STAFF_NAME_BASE_FONT_SIZE = 11
-STAFF_NAME_MIN_FONT_SIZE = 7
-STAFF_NAME_FIT_CHARS_AT_BASE_SIZE = 19
+FALL_PREVENTION_TEXT = (
+    "Post-fall measures (circle):         Alarm          Nonskid socks          Fall sign"
+    "          Stay with pt toileting          Fall risk score          Other                  "
+)
+STAFF_ROW_HEIGHT = 29.63
+STAFF_TABLE_FONT_SIZE = 14
+STAFF_NAME_BASE_FONT_SIZE = 14
+STAFF_NAME_MIN_FONT_SIZE = 9
+STAFF_NAME_FIT_CHARS_AT_BASE_SIZE = 30
+BOTTOM_TITLE_SPACER_HEIGHT = 8
 
 
 @dataclass(frozen=True)
@@ -161,7 +174,7 @@ def _build_front_sheet(
     fall_end = _fall_form(sheet, work_date, fall_start)
     spacer_row = fall_end + 1
     bottom_title_row = fall_end + 2
-    sheet.row_dimensions[spacer_row].height = 3
+    sheet.row_dimensions[spacer_row].height = BOTTOM_TITLE_SPACER_HEIGHT
     sheet.row_dimensions[bottom_title_row].height = 32
     _bottom_title(sheet, work_date, shift_kind, bottom_title_row)
     sheet.print_area = f"B1:H{bottom_title_row}"
@@ -178,7 +191,7 @@ def _build_back_sheet(
 ) -> None:
     effective_top_margin = max(0.05, min(0.45, 0.15 + offset))
     _apply_common_page_setup(sheet)
-    sheet.page_margins.left = 0.12
+    sheet.page_margins.left = 0.25
     sheet.page_margins.right = 0.75
     sheet.page_margins.top = effective_top_margin
     sheet.print_area = f"B1:H{layout.total_rows}"
@@ -196,7 +209,9 @@ def _build_back_sheet(
             cell = sheet.cell(row, column)
             cell.border = Border(bottom=BACK_LINE_SIDE)
 
-    _bottom_title(sheet, work_date, shift_kind, layout.total_rows, horizontal="left")
+    _back_blank_space_message(sheet, max(layout.back_line_rows) + 1)
+    _back_footer(sheet, layout.total_rows - 1)
+    _bottom_title(sheet, work_date, shift_kind, layout.total_rows, horizontal="left", mirrored=True, color=BACK_TEXT_COLOR)
     _apply_back_text_color(sheet, layout.total_rows)
 
 
@@ -281,7 +296,7 @@ def _apply_common_page_setup(sheet: Worksheet) -> None:
     sheet.page_setup.fitToHeight = 1
     sheet.sheet_properties.pageSetUpPr.fitToPage = True
     sheet.page_margins.left = 0.75
-    sheet.page_margins.right = 0.12
+    sheet.page_margins.right = 0.25
     sheet.page_margins.top = 0.15
     sheet.page_margins.bottom = 0.15
 
@@ -291,7 +306,7 @@ def _set_front_dimensions(sheet: Worksheet) -> None:
         sheet.column_dimensions[column].width = width
     sheet.row_dimensions[1].height = 32
     for row in range(2, 61):
-        sheet.row_dimensions[row].height = 25
+        sheet.row_dimensions[row].height = STAFF_ROW_HEIGHT
 
 
 def _copy_dimensions(source: Worksheet, target: Worksheet, total_rows: int) -> None:
@@ -314,8 +329,7 @@ def _title_row(
 ) -> None:
     sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=8)
     cell = sheet.cell(row, 2)
-    cell.value = _title(work_date, shift_kind)
-    cell.font = Font(bold=True, size=font_size)
+    cell.value = _title_rich_text(work_date, shift_kind, mirrored=horizontal == "left")
     cell.alignment = Alignment(horizontal=horizontal, vertical="center")
     if fill:
         for column in range(2, 9):
@@ -331,16 +345,14 @@ def _front_title_row(sheet: Worksheet, work_date: date, shift_kind: str) -> None
 
     sheet.merge_cells(start_row=1, start_column=7, end_row=1, end_column=8)
     title_cell = sheet.cell(1, 7)
-    title_cell.value = _title(work_date, shift_kind)
-    title_cell.font = Font(bold=True, size=22)
+    title_cell.value = _title_rich_text(work_date, shift_kind)
     title_cell.alignment = Alignment(horizontal="right", vertical="center", shrink_to_fit=True)
 
 
 def _back_title_row(sheet: Worksheet, work_date: date, shift_kind: str) -> None:
     sheet.merge_cells(start_row=1, start_column=2, end_row=1, end_column=6)
     title_cell = sheet.cell(1, 2)
-    title_cell.value = _title(work_date, shift_kind)
-    title_cell.font = Font(bold=True, size=22)
+    title_cell.value = _title_rich_text(work_date, shift_kind, mirrored=True, color=BACK_TEXT_COLOR)
     title_cell.alignment = Alignment(horizontal="left", vertical="center")
 
     sheet.merge_cells(start_row=1, start_column=7, end_row=1, end_column=8)
@@ -357,15 +369,32 @@ def _bottom_title(
     row: int,
     fill: PatternFill | None = None,
     horizontal: str = "right",
+    mirrored: bool = False,
+    color: str | None = None,
 ) -> None:
     sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=8)
     cell = sheet.cell(row, 2)
-    cell.value = _title(work_date, shift_kind)
-    cell.font = Font(bold=True, size=22)
+    cell.value = _title_rich_text(work_date, shift_kind, mirrored=mirrored, color=color)
     cell.alignment = Alignment(horizontal=horizontal, vertical="center")
     if fill:
         for column in range(2, 9):
             sheet.cell(row, column).fill = fill
+
+
+def _back_blank_space_message(sheet: Worksheet, row: int) -> None:
+    sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=8)
+    cell = sheet.cell(row, 2)
+    cell.value = BACK_BLANK_SPACE_TEXT
+    cell.font = Font(size=BACK_BLANK_SPACE_FONT_SIZE, color=BACK_TEXT_COLOR)
+    cell.alignment = Alignment(horizontal="center", vertical="center")
+
+
+def _back_footer(sheet: Worksheet, row: int) -> None:
+    sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=8)
+    cell = sheet.cell(row, 2)
+    cell.value = BACK_FOOTER_TEXT
+    cell.font = Font(size=BACK_FOOTER_FONT_SIZE, color=BACK_TEXT_COLOR)
+    cell.alignment = Alignment(horizontal="center", vertical="center")
 
 
 def _section_header(sheet: Worksheet, row: int, label: str, periods: tuple[str, str, str]) -> None:
@@ -380,7 +409,7 @@ def _section_header(sheet: Worksheet, row: int, label: str, periods: tuple[str, 
             cell.font = Font(bold=True, size=7)
             cell.alignment = Alignment(horizontal="center", vertical="center", shrink_to_fit=True)
         else:
-            cell.font = Font(bold=True, size=24 if offset == 3 else 11)
+            cell.font = Font(bold=True, size=24 if offset == 3 else STAFF_TABLE_FONT_SIZE)
             cell.alignment = Alignment(horizontal="center" if offset >= 4 else "left", vertical="center")
 
 
@@ -397,6 +426,7 @@ def _staff_rows(
         for column in range(2, 9):
             cell = sheet.cell(row, column)
             cell.border = GRID_BORDER
+            cell.font = Font(size=STAFF_TABLE_FONT_SIZE)
             cell.alignment = Alignment(vertical="center")
 
         if row_offset >= len(records):
@@ -413,7 +443,7 @@ def _staff_rows(
         if show_lead:
             lead_cell = sheet.cell(row, 6)
             lead_cell.value = "LEAD"
-            lead_cell.font = Font(bold=True)
+            lead_cell.font = Font(bold=True, size=STAFF_TABLE_FONT_SIZE)
             lead_cell.alignment = Alignment(horizontal="center", vertical="center")
 
         for column, is_standard in (
@@ -422,7 +452,7 @@ def _staff_rows(
         ):
             if not is_standard:
                 cell = sheet.cell(row, column)
-                cell.font = Font(size=11)
+                cell.font = Font(size=STAFF_TABLE_FONT_SIZE)
                 cell.fill = UNORTHODOX_TIME_FILL
 
 
@@ -507,6 +537,7 @@ def format_end_time(value: time) -> str:
 def _write_time_cell(cell, display_value: str) -> None:
     cell.value = int(display_value)
     cell.number_format = "0000"
+    cell.font = Font(size=STAFF_TABLE_FONT_SIZE)
     cell.alignment = Alignment(horizontal="center", vertical="center")
 
 
@@ -523,7 +554,37 @@ def _sheet_name(work_date: date, shift_kind: str) -> str:
 
 
 def _title(work_date: date, shift_kind: str) -> str:
-    return f"{work_date.strftime('%a')} {work_date.month}/{work_date.day} - {shift_kind}"
+    return _title_text(work_date, shift_kind)
+
+
+def _title_text(work_date: date, shift_kind: str, *, mirrored: bool = False) -> str:
+    date_label = f"{work_date.month}/{work_date.day}"
+    shift_marker = "\u25ef" if shift_kind == SHIFT_DAY else "\u2b24"
+    shift_label = "Day" if shift_kind == SHIFT_DAY else "Night"
+    shift_text = f"{work_date.strftime('%A')} {shift_label} Shift"
+    if mirrored:
+        return f"{date_label} {shift_marker} {shift_text}"
+    return f"{shift_text} {shift_marker} {date_label}"
+
+
+def _title_rich_text(work_date: date, shift_kind: str, *, mirrored: bool = False, color: str | None = None) -> CellRichText:
+    date_label = f"{work_date.month}/{work_date.day}"
+    shift_marker = "\u25ef" if shift_kind == SHIFT_DAY else "\u2b24"
+    shift_label = "Day" if shift_kind == SHIFT_DAY else "Night"
+    shift_text = f"{work_date.strftime('%A')} {shift_label} Shift"
+    date_block = _title_text_block(f"{date_label} " if mirrored else f" {date_label}", size=22, bold=True, color=color)
+    marker_block = _title_text_block(shift_marker, size=22, bold=True, color=color)
+    shift_block = _title_text_block(f" {shift_text}" if mirrored else f"{shift_text} ", size=16, bold=False, color=color)
+    if mirrored:
+        return CellRichText(date_block, marker_block, shift_block)
+    return CellRichText(shift_block, marker_block, date_block)
+
+
+def _title_text_block(text: str, *, size: int, bold: bool, color: str | None) -> TextBlock:
+    font_options = {"sz": size, "b": bold}
+    if color:
+        font_options["color"] = color
+    return TextBlock(InlineFont(**font_options), text)
 
 
 def _date_short(work_date: date) -> str:

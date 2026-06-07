@@ -60,7 +60,7 @@ The parser should preserve the source evidence used to determine clinical leader
 
 - Times display as four-digit 24-hour values: `0700`, `1930`, `1400`.
 - Exact short-shift start and end times must be preserved.
-- Non-standard start or end times should keep standard size 11 text and stand out with yellow highlighting only.
+- Non-standard start or end times should keep standard size 14 text and stand out with yellow highlighting only.
 - If an end time is exactly `1900`, display it as `1930`.
 - If an end time is exactly `0700`, display it as `0730`.
 - Standard 12-hour day shifts should display as `0700` to `1930`.
