@@ -63,7 +63,7 @@ Verify:
 - End time `0700` displays as `0730`.
 - Non-standard start times are preserved.
 - Non-standard end times are preserved.
-- Non-standard time cells are yellow highlighted with standard size 11, non-bold text in the generated workbook.
+- Non-standard time cells are yellow highlighted with standard size 14, non-bold text in the generated workbook.
 
 ## Workbook Tests
 
@@ -75,16 +75,25 @@ Verify:
 - For each date, `NIGHT` comes before `DAY`.
 - `BACK` sheets are omitted when back pages are disabled.
 - `BACK` sheets immediately follow matching front sheets when enabled.
-- Front sheet title merge covers `B:H`.
 - Print area uses the expected visible columns.
-- RN section has 15 staff/blank rows total.
+- Column `B` is wide enough for square initials cells while total `B:H` width stays fixed.
+- Column `C` is widened for names and Start/End columns are widened for 14pt four-digit times.
+- Front and back date titles use rich text with full weekday/shift wording, day/night circle, and mirrored back-page ordering.
+- RN section has 16 staff/blank rows total.
 - PSA section has 11 staff/blank rows total.
 - RN and PSA sections add one extra blank writable row when filled to capacity.
+- Front and matching back-page row heights are identical so writing lines align.
+- Back writing lines are solid thin and light gray.
+- Back-page text is light gray, including top title, reminder, notes label, footer, and bottom title.
+- Back-page blank-space message appears centered immediately below the writing lines.
+- Back-page footer contains the MyTime creator/version label in small text.
 - `Other` section appears only when unknown codes exist.
 - Fall information form is present on every front sheet.
+- Fall prevention options are evenly spaced, contain no underscores, and leave open write-in space after `Other`.
 - Portrait letter print settings are applied.
 - Fit-to-page settings are applied.
-- Binder-safe margin expectations are met.
+- Binder-safe and printer-safe margin expectations are met.
+- Synthetic verification samples include day and night front/back sheets, long names that trigger automatic shrink-to-fit, and non-standard start/end times.
 
 ## Desired Output Example Tests
 
