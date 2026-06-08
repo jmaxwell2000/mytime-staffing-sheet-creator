@@ -1,6 +1,6 @@
 # MyTime Staffing Sheet Creator
 
-Current release: v2.0. Updated June 3, 2026.
+Current release: v2.1. Updated June 8, 2026.
 
 This project is a lightweight open-source web app that converts a source scheduling export workbook into a print-ready staffing workbook. The app is intended for a nurse manager or charge nurse workflow: upload an `.xlsx`, convert it, download the finished staffing workbook, and print it without manual editing.
 

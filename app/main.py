@@ -10,6 +10,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
+from app import __updated_date__, __version__
 from app.parser import parse_workbook
 from app.workbook import build_staffing_workbook, filename_for_records
 
@@ -23,7 +24,12 @@ app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    return (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
+    template = (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
+    return (
+        template.replace("{{ app_version }}", __version__)
+        .replace("{{ asset_version }}", __version__)
+        .replace("{{ updated_date }}", __updated_date__)
+    )
 
 
 @app.get("/healthz")

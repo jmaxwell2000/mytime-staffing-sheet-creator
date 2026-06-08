@@ -186,3 +186,7 @@ generated workbook cell values
 Use environment variables only for non-sensitive runtime settings such as max upload size. No secrets are expected for the initial app.
 
 The app should work as a small web service with a single process and request-scoped conversion.
+
+## Release Metadata
+
+Before publishing changes to GitHub, update `app.__version__` and `app.__updated_date__`. The web interface, public docs, and generated workbook footer should use those values or be kept in sync by tests.

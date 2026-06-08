@@ -142,17 +142,11 @@ Each `BACK` sheet is a lined notes page paired with the front sheet. It should i
 - `Use pencil` in gray near the top-right.
 - Centered `Notes (Please initial)` line near the top.
 - Light solid horizontal writing lines.
-- Centered small message immediately below the writing lines:
-
-```text
-Please enjoy this complementary blank space for no additional charge
-```
-
 - Same date/shift title repeated at the bottom, aligned to the left edge.
 - A small footer below the writing lines and above the bottom title:
 
 ```text
-Created by MyTime Staffing Sheet Creator v2.0
+Created by MyTime Staffing Sheet Creator v2.1
 ```
 
 Back-page text should be light gray so it remains readable without competing with handwritten notes.

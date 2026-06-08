@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MyTime Staffing Sheet Creator</title>
-    <link rel="stylesheet" href="/static/app.css?v=2.0" />
+    <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}" />
   </head>
   <body>
     <main class="shell">
@@ -21,7 +21,7 @@
             <input id="workbook" name="workbook" type="file" accept=".xlsx" required />
           </label>
 
-          <details class="options">
+          <details id="options-panel" class="options">
             <summary>Options</summary>
             <div class="option-grid">
               <label class="toggle">
@@ -49,16 +49,19 @@
             </div>
           </details>
 
-          <button id="submit-button" class="primary-button" type="submit">Convert and download</button>
+          <button id="submit-button" class="primary-button" type="submit" data-state="idle">
+            <span class="button-loader" aria-hidden="true"></span>
+            <span id="submit-button-label">Upload file</span>
+          </button>
           <p id="status" class="status" role="status" aria-live="polite"></p>
         </form>
 
         <footer class="app-meta" aria-label="Version information">
-          <span>v2.0</span>
-          <span>Updated June 3, 2026</span>
+          <span>v{{ app_version }}</span>
+          <span>Updated {{ updated_date }}</span>
         </footer>
       </section>
     </main>
-    <script src="/static/app.js?v=4"></script>
+    <script src="/static/app.js?v={{ asset_version }}"></script>
   </body>
 </html>
