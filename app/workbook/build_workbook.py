@@ -17,6 +17,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
+from app import __version__
 from app.parser.constants import EXCLUDED_JOB_CODES, ROLE_OTHER, ROLE_PSA, ROLE_RN, SHIFT_DAY, SHIFT_NIGHT
 from app.parser.models import ScheduleRecord
 
@@ -29,11 +30,9 @@ BACK_LINE_ROWS = tuple(range(3, 31))
 COLUMN_WIDTHS = {"A": 2, "B": 5.01, "C": 35.2, "D": 7.0, "E": 7.0, "F": 29.16, "G": 29.16, "H": 29.16}
 FRONT_PENCIL_REMINDER = "Use pencil. Write and initial notes on the back of this sheet."
 BACK_PENCIL_REMINDER = "Use pencil"
-WORKBOOK_CREATOR_VERSION = "v2.0"
+WORKBOOK_CREATOR_VERSION = f"v{__version__}"
 BACK_FOOTER_TEXT = f"Created by MyTime Staffing Sheet Creator {WORKBOOK_CREATOR_VERSION}"
 BACK_FOOTER_FONT_SIZE = 8
-BACK_BLANK_SPACE_TEXT = "Please enjoy this complementary blank space for no additional charge"
-BACK_BLANK_SPACE_FONT_SIZE = 8
 
 HEADER_FILL = PatternFill("solid", fgColor="D9E3F0")
 UNORTHODOX_TIME_FILL = PatternFill("solid", fgColor="FFF2CC")
@@ -209,7 +208,6 @@ def _build_back_sheet(
             cell = sheet.cell(row, column)
             cell.border = Border(bottom=BACK_LINE_SIDE)
 
-    _back_blank_space_message(sheet, max(layout.back_line_rows) + 1)
     _back_footer(sheet, layout.total_rows - 1)
     _bottom_title(sheet, work_date, shift_kind, layout.total_rows, horizontal="left", mirrored=True, color=BACK_TEXT_COLOR)
     _apply_back_text_color(sheet, layout.total_rows)
@@ -379,14 +377,6 @@ def _bottom_title(
     if fill:
         for column in range(2, 9):
             sheet.cell(row, column).fill = fill
-
-
-def _back_blank_space_message(sheet: Worksheet, row: int) -> None:
-    sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=8)
-    cell = sheet.cell(row, 2)
-    cell.value = BACK_BLANK_SPACE_TEXT
-    cell.font = Font(size=BACK_BLANK_SPACE_FONT_SIZE, color=BACK_TEXT_COLOR)
-    cell.alignment = Alignment(horizontal="center", vertical="center")
 
 
 def _back_footer(sheet: Worksheet, row: int) -> None:

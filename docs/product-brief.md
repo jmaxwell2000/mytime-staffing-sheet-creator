@@ -1,6 +1,6 @@
 # Product Brief
 
-Current release: v2.0. Updated June 3, 2026.
+Current release: v2.1. Updated June 8, 2026.
 
 ## Goal
 
@@ -39,9 +39,10 @@ When the parser cannot confidently identify key fields, dates, names, job codes,
 2. User uploads a source scheduling `.xlsx`.
 3. Optional: user opens the collapsed options menu.
 4. Optional: user enables back pages and adjusts the back page offset.
-5. User starts conversion.
-6. App processes the workbook.
-7. Browser automatically downloads the generated staffing workbook.
+5. User starts conversion after the button changes to `Create staffing sheets`.
+6. App shows a clear `Creating...` processing state.
+7. Browser downloads the generated staffing workbook and the button changes to `Downloaded`.
+8. User can pick a new file to reset the interface for another conversion.
 
 ## Non-Goals For The Initial Version
 

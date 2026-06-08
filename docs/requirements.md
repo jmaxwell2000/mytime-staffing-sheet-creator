@@ -1,6 +1,6 @@
 # Requirements
 
-Current release: v2.0. Updated June 3, 2026.
+Current release: v2.1. Updated June 8, 2026.
 
 ## Input
 
@@ -69,8 +69,9 @@ The parser should preserve the source evidence used to determine clinical leader
 ## Web UI
 
 - Single upload control for a source scheduling `.xlsx`.
-- Primary conversion button.
+- Primary conversion button with visible states: `Upload file`, `Create staffing sheets`, `Creating...`, and `Downloaded`.
 - Collapsed options menu by default.
+- Remember the user's local defaults for `Include back pages` and `Back page offset`.
 - `Back page offset` control inside options.
 - Offset feature disabled by default.
 - When offset is disabled, generate front sheets only.
@@ -100,7 +101,7 @@ If back lines print too high, increase the offset.
 If back lines print too low, decrease the offset.
 ```
 
-Persist the offset locally in the browser. Do not persist it on the server.
+Persist the back-page toggle and offset locally in the browser. Do not persist them on the server.
 
 ## Backend Endpoints
 

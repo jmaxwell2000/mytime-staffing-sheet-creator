@@ -7,8 +7,6 @@ from openpyxl.cell.rich_text import CellRichText
 from app.parser.constants import ROLE_PSA, ROLE_RN, SHIFT_DAY, SHIFT_NIGHT
 from app.parser.models import ScheduleRecord
 from app.workbook.build_workbook import (
-    BACK_BLANK_SPACE_FONT_SIZE,
-    BACK_BLANK_SPACE_TEXT,
     BACK_FOOTER_FONT_SIZE,
     BACK_FOOTER_TEXT,
     BACK_LINE_ROWS,
@@ -332,16 +330,13 @@ def test_workbook_front_and_back_structure_and_time_styling():
     assert back["B1"].alignment.horizontal == "left"
     assert back["B39"].alignment.horizontal == "left"
     assert back["B39"].value == "4/29 \u25ef Wednesday Day Shift"
-    assert back["B31"].value == BACK_BLANK_SPACE_TEXT
-    assert back["B31"].font.sz == BACK_BLANK_SPACE_FONT_SIZE
-    assert back["B31"].alignment.horizontal == "center"
+    assert back["B31"].value is None
     assert back["B38"].value == BACK_FOOTER_TEXT
     assert back["B38"].font.sz == BACK_FOOTER_FONT_SIZE
     assert back["B38"].alignment.horizontal == "center"
     assert _rgb(back["B1"].font.color) == "A6A6A6"
     assert _rgb(back["G1"].font.color) == "A6A6A6"
     assert _rgb(back["B3"].font.color) == "A6A6A6"
-    assert _rgb(back["B31"].font.color) == "A6A6A6"
     assert _rgb(back["B38"].font.color) == "A6A6A6"
     assert back["B3"].border.bottom.style == "thin"
     assert _rgb(back["B3"].border.bottom.color) == "D9D9D9"
